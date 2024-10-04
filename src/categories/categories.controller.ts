@@ -1,0 +1,18 @@
+import { Controller, Get } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CategoryService } from './categories.service';
+import { Category } from '@prisma/client';
+import { CategoryListDto } from './dto/categories.dto';
+
+@Controller('categories')
+@ApiTags('Category API')
+export class CategoryController {
+    constructor(private readonly categoryService: CategoryService) {}
+
+    @Get()
+    @ApiOperation({ summary: '모든 카테고리(취미의 종류) 리스트' })
+    @ApiOkResponse({ type: CategoryListDto })
+    async findAllCategories(): Promise<CategoryListDto>{
+        return this.categoryService.findAllCategories();
+    }
+}
