@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CategoryData } from '../type/categories-data.type';
+import { CategoryData } from '../type/category-data.type';
 
 export class CategoryDto {
     @ApiProperty({
