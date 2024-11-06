@@ -102,6 +102,28 @@ export class EventRepository{
             },
         });
     }
+    //user가 event에 이미 참가했는지 확인
+    async isUserJoinedEvent(userId: number, eventId: number): Promise<boolean> {
+        const event = await this.prisma.eventJoin.findUnique({
+            where: {
+                eventId_userId: {
+                    eventId,
+                    userId,
+                },
+                user: {
+                    deletedAt: null,
+                },
+            },
+        });
+        return !!event;
+    
+    }
+    //현재 참여자 수
+    async getEventMembers(eventId: number): Promise<number> {
+        return this.prisma.eventJoin.count({
+            where: {eventId},
+        });
+    }
     //event 업데이트
     async updateEvent(
         eventId: number,

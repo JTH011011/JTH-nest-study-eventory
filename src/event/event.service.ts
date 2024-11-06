@@ -149,5 +149,25 @@ export class EventService {
             }
             await this.eventRepository.deleteEvent(eventId);
         }
+
+        async joinEvent(eventId: number, userId: number): Promise<void> {
+            //이거엔 아직 user가 없어서 나중에 구현
+            const event = await this.eventRepository.getEventById(eventId);
+            if(!event){
+                throw new NotFoundException('이벤트가 존재하지 않습니다.');
+            }
+            if(event.endTime <= new Date()){
+                throw new ConflictException('이벤트가 이미 종료되었습니다.');
+            }
+            const alreadyJoined = await this.eventRepository.isUserJoinedEvent(userId, eventId);
+            if(alreadyJoined){
+                throw new ConflictException('이미 참가한 이벤트입니다.');
+            }
+            const currentMembers = await this.eventRepository.getEventMembers(eventId);
+            if(currentMembers >= event.maxPeople){
+                throw new ConflictException('이벤트의 정원이 꽉 찼습니다.');
+            }
+
+        }
         
 }
