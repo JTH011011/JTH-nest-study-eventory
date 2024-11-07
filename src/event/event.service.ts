@@ -207,8 +207,7 @@ export class EventService {
     if (event.endTime <= new Date()) {
       throw new ConflictException('이벤트가 이미 종료되었습니다.');
     }
-    const numberOfParticipants =
-      await this.eventRepository.getNumberOfParticipants(eventId);
+    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
     if (numberOfParticipants >= event.maxPeople) {
       throw new ConflictException('이벤트가 꽉 찼습니다.');
     }
@@ -222,23 +221,8 @@ export class EventService {
     if (event.endTime <= new Date()) {
       throw new ConflictException('이벤트가 이미 종료되었습니다.');
     }
-    if (event.hostId === userId) {
-      // 다음 참가자를 호스트로 지정하기 위한 ID 조회
-      const newHostId = await this.eventRepository.getNextParticipantId(
-        eventId,
-        userId,
-      );
-
-      if (newHostId) {
-        await this.eventRepository.updateEventHost(eventId, newHostId);
-      } else {
-        await this.deleteEvent(eventId);
-        return;
-      }
-    }
     await this.eventRepository.leaveEvent(eventId, userId);
-    const numberOfParticipants =
-      await this.eventRepository.getNumberOfParticipants(eventId);
+    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
     if (numberOfParticipants === 0) {
       await this.deleteEvent(eventId);
     }
