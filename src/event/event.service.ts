@@ -171,7 +171,8 @@ export class EventService {
     if (event.endTime <= new Date()) {
       throw new BadRequestException('이벤트가 이미 종료되었습니다.');
     }
-    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
+    const numberOfParticipants =
+      await this.eventRepository.getNumberOfParticipants(eventId);
     if (numberOfParticipants >= event.maxPeople) {
       throw new ConflictException('이벤트가 꽉 찼습니다.');
     }
@@ -185,11 +186,11 @@ export class EventService {
     if (event.endTime <= new Date()) {
       throw new BadRequestException('이벤트가 이미 종료되었습니다.');
     }
-    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
+    const numberOfParticipants =
+      await this.eventRepository.getNumberOfParticipants(eventId);
     if (numberOfParticipants <= 0) {
       throw new ConflictException('참가자가 없습니다.');
     }
     await this.eventRepository.leaveEvent(eventId, userId);
   }
-
 }
