@@ -141,4 +141,30 @@ export class EventRepository {
       },
     });
   }
+  //배열개수로 현재인원수 조회
+  async getNumberOfParticipants(eventId: number): Promise<number> {
+    return this.prisma.eventJoin.count({
+      where: {
+        eventId,
+      },
+    });
+  }
+  //event 참가
+  async joinEvent(eventId: number, userId: number): Promise<void> {
+    await this.prisma.eventJoin.create({
+      data: {
+        eventId,
+        userId,
+      },
+    });
+  }
+  //event 나가기
+  async leaveEvent(eventId: number, userId: number): Promise<void> {
+    await this.prisma.eventJoin.deleteMany({
+      where: {
+        eventId,
+        userId,
+      },
+    });
+  }
 }

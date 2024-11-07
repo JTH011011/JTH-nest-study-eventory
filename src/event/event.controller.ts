@@ -82,4 +82,26 @@ export class EventController {
   ): Promise<void> {
     return this.eventService.deleteEvent(eventId);
   }
+
+  @Post(':eventId/join')
+  @HttpCode(204)
+  @ApiOperation({ summary: '이벤트 참가' })
+  @ApiCreatedResponse({ description: '이벤트에 참가했습니다' })
+  async joinEvent(
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Body('userId', ParseIntPipe) userId: number,
+  ): Promise<void> {
+    return this.eventService.joinEvent(eventId, userId);
+  }
+
+  @Post(':eventId/leave')
+  @HttpCode(204)
+  @ApiOperation({ summary: '이벤트 참가 취소' })
+  @ApiCreatedResponse({ description: '이벤트 참가를 취소했습니다' })
+  async leaveEvent(
+    @Param('eventId', ParseIntPipe) eventId: number,
+    @Body('userId', ParseIntPipe) userId: number,
+  ): Promise<void> {
+    return this.eventService.leaveEvent(eventId, userId);
+  }
 }
