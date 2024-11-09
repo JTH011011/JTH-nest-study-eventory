@@ -208,7 +208,8 @@ export class EventService {
     if (event.endTime <= new Date()) {
       throw new ConflictException('이벤트가 이미 종료되었습니다.');
     }
-    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
+    const numberOfParticipants =
+      await this.eventRepository.getNumberOfParticipants(eventId);
     if (numberOfParticipants >= event.maxPeople) {
       throw new ConflictException('이벤트가 꽉 찼습니다.');
     }
