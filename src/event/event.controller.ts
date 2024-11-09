@@ -86,7 +86,7 @@ export class EventController {
   @Post(':eventId/join')
   @HttpCode(204)
   @ApiOperation({ summary: '이벤트 참가' })
-  @ApiCreatedResponse({ description: '이벤트에 참가했습니다' })
+  @ApiNoContentResponse()
   async joinEvent(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body('userId', ParseIntPipe) userId: number,
@@ -97,7 +97,7 @@ export class EventController {
   @Post(':eventId/leave')
   @HttpCode(204)
   @ApiOperation({ summary: '이벤트 참가 취소' })
-  @ApiCreatedResponse({ description: '이벤트 참가를 취소했습니다' })
+  @ApiNoContentResponse()
   async leaveEvent(
     @Param('eventId', ParseIntPipe) eventId: number,
     @Body('userId', ParseIntPipe) userId: number,

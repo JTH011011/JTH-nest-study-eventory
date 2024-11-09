@@ -25,9 +25,6 @@ export class EventService {
     if (payload.startTime <= new Date()) {
       throw new BadRequestException('시작 시간은 현재 시간보다 늦어야 합니다.');
     }
-    if (payload.maxPeople <= 0) {
-      throw new BadRequestException('최대 인원은 0보다 커야 합니다.');
-    }
     const host = await this.eventRepository.getUserById(payload.hostId);
     if (!host) {
       throw new NotFoundException('호스트가 존재하지 않습니다.');
@@ -75,6 +72,44 @@ export class EventService {
 
     if (!event) {
       throw new NotFoundException('이벤트가 존재하지 않습니다.');
+    }
+    if (payload.title === null) {
+      throw new BadRequestException('제목은 null일 수 없습니다.');
+    }
+    if (payload.description === null) {
+      throw new BadRequestException('설명은 null일 수 없습니다.');
+    }
+    if (payload.categoryId === null) {
+      throw new BadRequestException('카테고리 ID는 null일 수 없습니다.');
+    }
+    if (payload.cityId === null) {
+      throw new BadRequestException('도시 ID는 null일 수 없습니다.');
+    }
+    if (payload.startTime === null) {
+      throw new BadRequestException('시작 시간은 null일 수 없습니다.');
+    }
+    if (payload.endTime === null) {
+      throw new BadRequestException('종료 시간은 null일 수 없습니다.');
+    }
+    if (payload.maxPeople === null) {
+      throw new BadRequestException('최대 인원은 null일 수 없습니다.');
+    }
+  
+    // 날짜 및 시간 검증
+    if (payload.startTime >= payload.endTime) {
+      throw new BadRequestException('시작 시간은 종료 시간보다 빨라야 합니다.');
+    }
+    if (payload.startTime <= new Date()) {
+      throw new ConflictException('시작 시간은 현재 시간보다 늦어야 합니다.');
+    }
+    if (payload.endTime <= new Date()) {
+      throw new BadRequestException('종료 시간은 현재 시간보다 늦어야 합니다.');
+    }
+    const currentParticipantCount = await this.eventRepository.getNumberOfParticipants(eventId);
+    if (payload.maxPeople < currentParticipantCount) {
+      throw new ConflictException(
+        `현재 참가자 수(${currentParticipantCount})보다 적은 숫자로 설정할 수 없습니다.`,
+      );
     }
     const updateData: UpdateEventData = {
       title: payload.title,
@@ -134,7 +169,7 @@ export class EventService {
     }
     if (payload.startTime) {
       if (payload.startTime <= new Date()) {
-        throw new BadRequestException(
+        throw new ConflictException(
           '시작 시간은 현재 시간보다 늦어야 합니다.',
         );
       }
@@ -150,9 +185,11 @@ export class EventService {
           '종료 시간은 현재 시간보다 늦어야 합니다.',
         );
       }
-    }
-    if (payload.maxPeople && payload.maxPeople <= 0) {
-      throw new BadRequestException('최대 인원은 0보다 커야 합니다.');
+      if (payload.endTime <= event.startTime) {
+        throw new BadRequestException(
+          '종료 시간은 원래 있던 시작 시간보다 늦어야 합니다.',
+        );
+      }
     }
     return EventDto.from(event);
   }
@@ -169,7 +206,7 @@ export class EventService {
       throw new NotFoundException('이벤트가 존재하지 않습니다.');
     }
     if (event.endTime <= new Date()) {
-      throw new BadRequestException('이벤트가 이미 종료되었습니다.');
+      throw new ConflictException('이벤트가 이미 종료되었습니다.');
     }
     const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
     if (numberOfParticipants >= event.maxPeople) {
@@ -183,13 +220,23 @@ export class EventService {
       throw new NotFoundException('이벤트가 존재하지 않습니다.');
     }
     if (event.endTime <= new Date()) {
-      throw new BadRequestException('이벤트가 이미 종료되었습니다.');
+      throw new ConflictException('이벤트가 이미 종료되었습니다.');
     }
-    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
-    if (numberOfParticipants <= 0) {
-      throw new ConflictException('참가자가 없습니다.');
-    }
+    if (event.hostId === userId) {
+      // 다음 참가자를 호스트로 지정하기 위한 ID 조회
+      const newHostId = await this.eventRepository.getNextParticipantId(eventId, userId);
+      
+      if (newHostId) {
+        await this.eventRepository.updateEventHost(eventId, newHostId);
+      } else {
+        await this.deleteEvent(eventId);
+        return;
+      }
+    }  
     await this.eventRepository.leaveEvent(eventId, userId);
+    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
+    if (numberOfParticipants === 0) {
+      await this.deleteEvent(eventId);
+    }
   }
-
 }

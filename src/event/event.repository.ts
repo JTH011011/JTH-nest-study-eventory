@@ -167,4 +167,34 @@ export class EventRepository {
       },
     });
   }
+  async getNextParticipantId(eventId: number, userId: number): Promise<number | null> {
+    const participants = await this.prisma.eventJoin.findMany({
+      where: {
+        eventId,
+        userId: {
+          not: userId,
+        },
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      select: {
+        userId: true,
+      },
+    });
+    if (participants.length === 0) {
+      return null;
+    }
+    return participants[0].userId;
+  }
+  async updateEventHost(eventId: number, hostId: number): Promise<void> {
+    await this.prisma.event.update({
+      where: {
+        id: eventId,
+      },
+      data: {
+        hostId,
+      },
+    });
+  }
 }
