@@ -167,7 +167,10 @@ export class EventRepository {
       },
     });
   }
-  async getNextParticipantId(eventId: number, userId: number): Promise<number | null> {
+  async getNextParticipantId(
+    eventId: number,
+    userId: number,
+  ): Promise<number | null> {
     const participants = await this.prisma.eventJoin.findMany({
       where: {
         eventId,

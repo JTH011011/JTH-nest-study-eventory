@@ -46,7 +46,6 @@ export class CreateEventPayload {
   })
   startTime!: Date;
 
-
   @IsDate()
   @Type(() => Date)
   @ApiProperty({
