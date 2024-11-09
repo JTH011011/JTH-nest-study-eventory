@@ -94,7 +94,7 @@ export class EventService {
     if (payload.maxPeople === null) {
       throw new BadRequestException('최대 인원은 null일 수 없습니다.');
     }
-  
+
     // 날짜 및 시간 검증
     if (payload.startTime >= payload.endTime) {
       throw new BadRequestException('시작 시간은 종료 시간보다 빨라야 합니다.');
@@ -105,7 +105,8 @@ export class EventService {
     if (payload.endTime <= new Date()) {
       throw new BadRequestException('종료 시간은 현재 시간보다 늦어야 합니다.');
     }
-    const currentParticipantCount = await this.eventRepository.getNumberOfParticipants(eventId);
+    const currentParticipantCount =
+      await this.eventRepository.getNumberOfParticipants(eventId);
     if (payload.maxPeople < currentParticipantCount) {
       throw new ConflictException(
         `현재 참가자 수(${currentParticipantCount})보다 적은 숫자로 설정할 수 없습니다.`,
@@ -169,9 +170,7 @@ export class EventService {
     }
     if (payload.startTime) {
       if (payload.startTime <= new Date()) {
-        throw new ConflictException(
-          '시작 시간은 현재 시간보다 늦어야 합니다.',
-        );
+        throw new ConflictException('시작 시간은 현재 시간보다 늦어야 합니다.');
       }
       if (payload.startTime >= event.endTime) {
         throw new BadRequestException(
@@ -225,17 +224,21 @@ export class EventService {
     }
     if (event.hostId === userId) {
       // 다음 참가자를 호스트로 지정하기 위한 ID 조회
-      const newHostId = await this.eventRepository.getNextParticipantId(eventId, userId);
-      
+      const newHostId = await this.eventRepository.getNextParticipantId(
+        eventId,
+        userId,
+      );
+
       if (newHostId) {
         await this.eventRepository.updateEventHost(eventId, newHostId);
       } else {
         await this.deleteEvent(eventId);
         return;
       }
-    }  
+    }
     await this.eventRepository.leaveEvent(eventId, userId);
-    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
+    const numberOfParticipants =
+      await this.eventRepository.getNumberOfParticipants(eventId);
     if (numberOfParticipants === 0) {
       await this.deleteEvent(eventId);
     }
