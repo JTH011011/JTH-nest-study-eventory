@@ -18,8 +18,7 @@ import { throwIfEmpty } from 'rxjs';
 @Injectable()
 export class EventService {
   constructor(private readonly eventRepository: EventRepository) {}
-  
-  
+
   async createEvent(payload: CreateEventPayload): Promise<EventDto> {
     const host = await this.eventRepository.getUserById(payload.hostId);
     if (!host) {
@@ -83,7 +82,9 @@ export class EventService {
       throw new BadRequestException('시작 시간은 현재 시간보다 늦어야 합니다.');
     }
     if (payload.categoryId !== undefined) {
-      const category = await this.eventRepository.getCategoryById(payload.categoryId);
+      const category = await this.eventRepository.getCategoryById(
+        payload.categoryId,
+      );
       if (!category) {
         throw new NotFoundException('카테고리가 존재하지 않습니다.');
       }
@@ -194,10 +195,11 @@ export class EventService {
       throw new BadRequestException('이벤트가 이미 종료되었습니다.');
     }
     const user = await this.eventRepository.getUserById(userId);
-    if(!user){
+    if (!user) {
       throw new NotFoundException('유저가 존재하지 않습니다.');
     }
-    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
+    const numberOfParticipants =
+      await this.eventRepository.getNumberOfParticipants(eventId);
     if (numberOfParticipants >= event.maxPeople) {
       throw new ConflictException('이벤트가 꽉 찼습니다.');
     }
@@ -212,13 +214,14 @@ export class EventService {
       throw new BadRequestException('이벤트가 이미 종료되었습니다.');
     }
     await this.eventRepository.leaveEvent(eventId, userId);
-    const numberOfParticipants = await this.eventRepository.getNumberOfParticipants(eventId);
+    const numberOfParticipants =
+      await this.eventRepository.getNumberOfParticipants(eventId);
     if (numberOfParticipants === 0) {
       await this.deleteEvent(eventId);
     }
     const isHost = event.hostId === userId;
     if (isHost) {
       throw new ConflictException('호스트는 이벤트에서 나갈 수 없습니다.');
-    }  
+    }
   }
 }

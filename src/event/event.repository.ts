@@ -168,7 +168,10 @@ export class EventRepository {
     });
   }
 
-  async getNextParticipantId(eventId: number, userId: number): Promise<number | null> {
+  async getNextParticipantId(
+    eventId: number,
+    userId: number,
+  ): Promise<number | null> {
     const participant = await this.prisma.eventJoin.findFirst({
       where: {
         eventId,
@@ -180,7 +183,7 @@ export class EventRepository {
         userId: true,
       },
     });
-    return participant? participant.userId : null;
+    return participant ? participant.userId : null;
   }
   async updateEventHost(eventId: number, hostId: number): Promise<void> {
     await this.prisma.event.update({
