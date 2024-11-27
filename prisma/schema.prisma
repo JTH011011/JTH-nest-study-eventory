@@ -56,12 +56,28 @@ model Club{
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  host     User     @relation(fields: [hostId], references: [id])
+  host     User   @relation(fields: [hostId], references: [id])
   
-  clubJoin ClubJoin[]
-  event    Event[]
+  clubJoin        ClubJoin[]
+  clubApplication ClubApplication[]
+  event           Event[]
 
   @@map("club")
+}
+
+model ClubApplication{
+  id         Int      @id @default(autoincrement())
+  clubId     Int      @map("club_id")
+  userId     Int      @map("user_id")
+  status     String   @default("PENDING") // pending, approved, rejected 3 상태로 하면 될지 궁금합니다
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  club  Club  @relation(fields: [clubId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([clubId, userId])
+  @@map("club_application")
 }
 
 model ClubJoin{
