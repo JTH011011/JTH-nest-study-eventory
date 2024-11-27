@@ -65,11 +65,16 @@ model Club{
   @@map("club")
 }
 
+enum ApplicationStatus {
+  PENDING
+  REJECTED
+}
+
 model ClubApplication{
   id         Int      @id @default(autoincrement())
   clubId     Int      @map("club_id")
   userId     Int      @map("user_id")
-  status     String   @default("PENDING") // pending, approved, rejected 3 상태로 하면 될지 궁금합니다
+  status     ApplicationStatus @default("PENDING")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
