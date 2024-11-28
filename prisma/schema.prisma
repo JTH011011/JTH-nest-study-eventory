@@ -29,6 +29,9 @@ model User {
   event     Event[]
   eventJoin EventJoin[]
   review    Review[]
+  club      Club[]
+  clubApplication ClubApplication[]
+  clubJoin  ClubJoin[]
 
   city     City?    @relation(fields: [cityId], references: [id])
   category Category @relation(fields: [categoryId], references: [id])
@@ -65,16 +68,10 @@ model Club{
   @@map("club")
 }
 
-enum ApplicationStatus {
-  PENDING
-  REJECTED
-}
-
 model ClubApplication{
   id         Int      @id @default(autoincrement())
   clubId     Int      @map("club_id")
   userId     Int      @map("user_id")
-  status     ApplicationStatus @default("PENDING")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
