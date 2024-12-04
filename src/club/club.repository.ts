@@ -37,7 +37,7 @@ export class ClubRepository {
         clubId,
         user: {
           deletedAt: null,
-        }
+        },
       },
       select: {
         userId: true,
@@ -46,7 +46,7 @@ export class ClubRepository {
 
     return data.map((d) => d.userId);
   }
-  
+
   async createClubApplication(clubId: number, userId: number): Promise<void> {
     await this.prisma.clubApplication.create({
       data: {
@@ -56,7 +56,10 @@ export class ClubRepository {
     });
   }
 
-  async findClubApplication(clubId: number, userId: number): Promise<ClubApplicationData | null> {
+  async findClubApplication(
+    clubId: number,
+    userId: number,
+  ): Promise<ClubApplicationData | null> {
     return this.prisma.clubApplication.findUnique({
       where: {
         clubId_userId: {
@@ -103,7 +106,7 @@ export class ClubRepository {
       }),
     ]);
   }
-  
+
   async rejectClubApplication(clubId: number, userId: number): Promise<void> {
     await this.prisma.clubApplication.delete({
       where: {

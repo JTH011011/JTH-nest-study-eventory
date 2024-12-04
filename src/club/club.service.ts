@@ -41,12 +41,15 @@ export class ClubService {
     }
 
     const memberIds = await this.clubRepository.getMembersById(clubId);
-    
+
     if (memberIds.includes(user.id)) {
       throw new ConflictException('이미 가입한 클럽입니다.');
     }
-    
-    const isAlreadyApplied = await this.clubRepository.findClubApplication(clubId, user.id);
+
+    const isAlreadyApplied = await this.clubRepository.findClubApplication(
+      clubId,
+      user.id,
+    );
 
     if (isAlreadyApplied) {
       throw new ConflictException('이미 가입 신청이 접수되었습니다.');
@@ -54,7 +57,6 @@ export class ClubService {
 
     await this.clubRepository.createClubApplication(clubId, user.id);
   }
-
 
   async patchUpdateClub(
     clubId: number,
