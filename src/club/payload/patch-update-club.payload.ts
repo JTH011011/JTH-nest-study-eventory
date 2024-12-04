@@ -1,11 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsInt,
-  IsOptional,
-  IsPositive,
-  IsString,
-} from 'class-validator';
+import { IsInt, IsOptional, IsPositive, IsString } from 'class-validator';
 
 export class PatchUpdateClubPayload {
   @IsOptional()

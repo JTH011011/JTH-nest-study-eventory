@@ -31,7 +31,7 @@ import { UserBaseInfo } from 'src/auth/type/user-base-info.type';
 
 @Controller('clubs')
 @ApiTags('Club API')
-export class ClubController{
+export class ClubController {
   constructor(private readonly clubService: ClubService) {}
 
   @Post()

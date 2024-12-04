@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ClubData } from '../type/club-data.type';
 
-export class ClubDto{
+export class ClubDto {
   @ApiProperty({
     description: '클럽 ID',
     type: Number,
