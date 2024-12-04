@@ -21,6 +21,11 @@ export class EventRepository {
         startTime: data.startTime,
         endTime: data.endTime,
         maxPeople: data.maxPeople,
+        eventJoin: {
+          create: {
+            userId: data.hostId,
+          },
+        },
         eventCity: {
           createMany: {
             data: data.cityIds.map((cityId) => ({
