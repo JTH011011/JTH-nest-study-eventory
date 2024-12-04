@@ -15,6 +15,11 @@ export class ClubRepository {
         hostId: data.hostId,
         name: data.name,
         description: data.description,
+        clubJoin: {
+          create: {
+            userId: data.hostId,
+          },
+        },
       },
       select: {
         id: true,
