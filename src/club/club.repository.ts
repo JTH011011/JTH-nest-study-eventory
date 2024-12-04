@@ -4,6 +4,7 @@ import { CreateClubData } from './type/create-club-data.type';
 import { ClubData } from './type/club-data.type';
 import { UpdateClubData } from './type/update-club-data.type';
 import { ClubQuery } from './query/club.query';
+import { ClubApplicationData } from './type/club-application-data.type';
 
 @Injectable()
 export class ClubRepository {
@@ -26,6 +27,90 @@ export class ClubRepository {
         hostId: true,
         name: true,
         description: true,
+      },
+    });
+  }
+
+  async getMembersById(clubId: number): Promise<number[]> {
+    const data = await this.prisma.clubJoin.findMany({
+      where: {
+        clubId,
+        user: {
+          deletedAt: null,
+        }
+      },
+      select: {
+        userId: true,
+      },
+    });
+
+    return data.map((d) => d.userId);
+  }
+  
+  async createClubApplication(clubId: number, userId: number): Promise<void> {
+    await this.prisma.clubApplication.create({
+      data: {
+        clubId,
+        userId,
+      },
+    });
+  }
+
+  async findClubApplication(clubId: number, userId: number): Promise<ClubApplicationData | null> {
+    return this.prisma.clubApplication.findUnique({
+      where: {
+        clubId_userId: {
+          clubId,
+          userId,
+        },
+      },
+      select: {
+        id: true,
+        clubId: true,
+        userId: true,
+      },
+    });
+  }
+
+  async findClubApplications(clubId: number): Promise<ClubApplicationData[]> {
+    return this.prisma.clubApplication.findMany({
+      where: {
+        clubId,
+      },
+      select: {
+        id: true,
+        clubId: true,
+        userId: true,
+      },
+    });
+  }
+
+  async approveClubApplication(clubId: number, userId: number): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.clubJoin.create({
+        data: {
+          clubId,
+          userId,
+        },
+      }),
+      this.prisma.clubApplication.delete({
+        where: {
+          clubId_userId: {
+            clubId,
+            userId,
+          },
+        },
+      }),
+    ]);
+  }
+  
+  async rejectClubApplication(clubId: number, userId: number): Promise<void> {
+    await this.prisma.clubApplication.delete({
+      where: {
+        clubId_userId: {
+          clubId,
+          userId,
+        },
       },
     });
   }

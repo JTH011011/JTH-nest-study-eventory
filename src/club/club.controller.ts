@@ -58,4 +58,16 @@ export class ClubController {
   ): Promise<ClubDto> {
     return this.clubService.patchUpdateClub(clubId, payload, user);
   }
+
+  @Post(':clubId/join')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '클럽 가입 신청' })
+  @ApiNoContentResponse()
+  async joinClub(
+    @Param('clubId', ParseIntPipe) clubId: number,
+    @CurrentUser() user: UserBaseInfo,
+  ): Promise<void> {
+    return this.clubService.joinClub(clubId, user);
+  }
 }
