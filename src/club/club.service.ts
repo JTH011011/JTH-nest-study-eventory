@@ -33,6 +33,31 @@ export class ClubService {
     return ClubDto.from(club);
   }
 
+  async joinClub(clubId: number, user: UserBaseInfo): Promise<void> {
+    const club = await this.clubRepository.findClubById(clubId);
+
+    if (!club) {
+      throw new NotFoundException('해당 클럽을 찾을 수 없습니다.');
+    }
+
+    const memberIds = await this.clubRepository.getMemberIdsByClubId(clubId);
+
+    if (memberIds.includes(user.id)) {
+      throw new ConflictException('이미 가입한 클럽입니다.');
+    }
+
+    const clubApplicationBefore = await this.clubRepository.findClubApplication(
+      clubId,
+      user.id,
+    );
+
+    if (clubApplicationBefore) {
+      throw new ConflictException('이미 가입 신청이 접수되었습니다.');
+    }
+
+    await this.clubRepository.createClubApplication(clubId, user.id);
+  }
+
   async patchUpdateClub(
     clubId: number,
     payload: PatchUpdateClubPayload,
