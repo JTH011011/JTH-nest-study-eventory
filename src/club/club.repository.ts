@@ -31,7 +31,7 @@ export class ClubRepository {
     });
   }
 
-  async getMembersById(clubId: number): Promise<number[]> {
+  async getMemberIdsByClubId(clubId: number): Promise<number[]> {
     const data = await this.prisma.clubJoin.findMany({
       where: {
         clubId,

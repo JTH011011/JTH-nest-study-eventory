@@ -40,18 +40,18 @@ export class ClubService {
       throw new NotFoundException('해당 클럽을 찾을 수 없습니다.');
     }
 
-    const memberIds = await this.clubRepository.getMembersById(clubId);
+    const memberIds = await this.clubRepository.getMemberIdsByClubId(clubId);
 
     if (memberIds.includes(user.id)) {
       throw new ConflictException('이미 가입한 클럽입니다.');
     }
 
-    const isAlreadyApplied = await this.clubRepository.findClubApplication(
+    const clubApplicationBefore = await this.clubRepository.findClubApplication(
       clubId,
       user.id,
     );
 
-    if (isAlreadyApplied) {
+    if (clubApplicationBefore) {
       throw new ConflictException('이미 가입 신청이 접수되었습니다.');
     }
 
