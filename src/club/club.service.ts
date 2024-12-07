@@ -8,11 +8,17 @@ import {
 import { CreateClubPayload } from './payload/create-club.payload';
 import { UserBaseInfo } from '../auth/type/user-base-info.type';
 import { ClubDto, ClubListDto } from './dto/club.dto';
+import {
+  ClubApplicationDto,
+  ClubApplicationListDto,
+} from './dto/club.application.dto';
 import { CreateClubData } from './type/create-club-data.type';
 import { ClubRepository } from './club.repository';
 import { ClubQuery } from './query/club.query';
 import { UpdateClubData } from './type/update-club-data.type';
 import { PatchUpdateClubPayload } from './payload/patch-update-club.payload';
+import { ClubApplication } from '@prisma/client';
+import { ClubApprovalPayload } from './payload/club-approval.payload';
 
 @Injectable()
 export class ClubService {
@@ -56,6 +62,57 @@ export class ClubService {
     }
 
     await this.clubRepository.createClubApplication(clubId, user.id);
+  }
+
+  async getClubApplicationList(
+    clubId: number,
+    user: UserBaseInfo,
+  ): Promise<ClubApplicationListDto> {
+    const club = await this.clubRepository.findClubById(clubId);
+
+    if (!club) {
+      throw new NotFoundException('클럽을 찾을 수 없습니다.');
+    }
+
+    if (club.hostId !== user.id) {
+      throw new ForbiddenException('당신은 이 클럽의 호스트가 아닙니다!');
+    }
+
+    const clubApplications =
+      await this.clubRepository.findClubApplications(clubId);
+
+    return ClubApplicationListDto.from(clubApplications);
+  }
+
+  async approveOrRejectClubApplication(
+    clubId: number,
+    payload: ClubApprovalPayload,
+    user: UserBaseInfo,
+  ): Promise<void> {
+    const { applicantUserId, isApproved } = payload;
+
+    const club = await this.clubRepository.findClubById(clubId);
+    if (!club) {
+      throw new NotFoundException('클럽을 찾을 수 없습니다.');
+    }
+
+    if (club.hostId !== user.id) {
+      throw new ForbiddenException('당신은 이 클럽의 호스트가 아닙니다!');
+    }
+
+    const clubApplication = await this.clubRepository.findClubApplication(
+      clubId,
+      applicantUserId,
+    );
+    if (!clubApplication) {
+      throw new NotFoundException('가입 신청서를 찾을 수 없습니다.');
+    }
+
+    if (isApproved) {
+      await this.clubRepository.approveClubApplication(clubId, applicantUserId);
+    } else {
+      await this.clubRepository.rejectClubApplication(clubId, applicantUserId);
+    }
   }
 
   async patchUpdateClub(

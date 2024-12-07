@@ -24,9 +24,14 @@ import { ClubService } from './club.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorator/user.decorator';
 import { ClubDto, ClubListDto } from './dto/club.dto';
+import {
+  ClubApplicationDto,
+  ClubApplicationListDto,
+} from './dto/club.application.dto';
 import { CreateClubPayload } from './payload/create-club.payload';
 import { ClubQuery } from './query/club.query';
 import { PatchUpdateClubPayload } from './payload/patch-update-club.payload';
+import { ClubApprovalPayload } from './payload/club-approval.payload';
 import { UserBaseInfo } from 'src/auth/type/user-base-info.type';
 
 @Controller('clubs')
@@ -69,5 +74,35 @@ export class ClubController {
     @CurrentUser() user: UserBaseInfo,
   ): Promise<void> {
     return this.clubService.joinClub(clubId, user);
+  }
+
+  @Get(':clubId/applications')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '클럽 가입 신청 목록' })
+  @ApiOkResponse({ type: ClubApplicationListDto })
+  async getClubApplications(
+    @Param('clubId', ParseIntPipe) clubId: number,
+    @CurrentUser() user: UserBaseInfo,
+  ): Promise<ClubApplicationListDto> {
+    return this.clubService.getClubApplicationList(clubId, user);
+  }
+
+  @Post(':clubId/approve')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '클럽 가입 승인' })
+  @HttpCode(204)
+  @ApiNoContentResponse()
+  async approveOrRejectClubApplication(
+    @Param('clubId', ParseIntPipe) clubId: number,
+    @Body() payload: ClubApprovalPayload,
+    @CurrentUser() user: UserBaseInfo,
+  ): Promise<void> {
+    return this.clubService.approveOrRejectClubApplication(
+      clubId,
+      payload,
+      user,
+    );
   }
 }
