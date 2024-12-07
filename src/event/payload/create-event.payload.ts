@@ -7,6 +7,7 @@ import {
   IsPositive,
   IsString,
   Min,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateEventPayload {
@@ -31,6 +32,15 @@ export class CreateEventPayload {
     type: String,
   })
   description!: string;
+
+  @IsOptional()
+  @IsInt()
+  @ApiProperty({
+    description: '클럽 ID',
+    type: Number,
+    nullable: true,
+  })
+  clubId?: number | null;
 
   @IsInt()
   @IsPositive()

@@ -56,12 +56,13 @@ export class EventController {
   }
 
   @Get(':eventId')
-  @ApiOperation({ summary: '모임 상세 조회' })
-  @ApiOkResponse({ type: EventDetailDto })
+  @ApiOperation({ summary: '모임 조회' })
+  @ApiOkResponse({ type: EventDto })
   async getEventById(
     @Param('eventId', ParseIntPipe) eventId: number,
-  ): Promise<EventDetailDto> {
-    return this.eventService.getEventById(eventId);
+    @CurrentUser() user: UserBaseInfo,
+  ): Promise<EventDto> {
+    return this.eventService.getEventByEventId(eventId, user);
   }
 
   @Get('me')

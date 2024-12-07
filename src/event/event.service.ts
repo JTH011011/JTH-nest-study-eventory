@@ -46,11 +46,24 @@ export class EventService {
         '모임 시작 시간은 현재 시간 이후여야 합니다.',
       );
     }
+    
+    if(payload.clubId){
+      const clubUser = await this.eventRepository.isClubUser(
+        user.id,
+        payload.clubId,
+      );
+      if (!clubUser) {
+        throw new ForbiddenException(
+          '클럽 회원만 클럽 모임을 생성할 수 있습니다',
+        );
+      }
+    }
 
     const data: CreateEventData = {
       hostId: user.id,
       title: payload.title,
       description: payload.description,
+      clubId: payload.clubId, 
       categoryId: payload.categoryId,
       cityIds: payload.cityIds,
       startTime: payload.startTime,
@@ -75,14 +88,23 @@ export class EventService {
     return EventListDto.from(events);
   }
 
-  async getEventById(eventId: number): Promise<EventDetailDto> {
-    const event = await this.eventRepository.findEventDetailById(eventId);
-
-    if (!event) {
+  async getEventByEventId(eventId: number, user: UserBaseInfo): Promise<EventDto> {
+    const event = await this.eventRepository.findEventById(eventId);
+    if(!event){
       throw new NotFoundException('모임을 찾을 수 없습니다.');
     }
+    if(event.clubId){
+      const isClubExist = await this.eventRepository.isClubExist(event.clubId);
+      if(!isClubExist){
+        throw new NotFoundException('클럽을 찾을 수 없습니다.');
+      }
 
-    return EventDetailDto.from(event);
+      const isClubUser = await this.eventRepository.isClubUser(user.id, event.clubId);
+      if(!isClubUser){
+        throw new ForbiddenException('클럽 회원만 클럽 모임을 조회할 수 있습니다.');
+      }
+    }
+    return EventDto.from(event);
   }
 
   async putUpdateEvent(
@@ -235,6 +257,21 @@ export class EventService {
     }
 
     if (participantsIds.length >= event.maxPeople) {
+      throw new ConflictException('인원이 가득 찼습니다.');
+    }
+    if(event.clubId){
+      const isClubExist = await this.eventRepository.isClubExist(event.clubId);
+      if(!isClubExist){
+        throw new NotFoundException('클럽이 이미 사라졌습니다.');
+      }
+
+      const isClubUser = await this.eventRepository.isClubUser(user.id, event.clubId);
+      if(!isClubUser){
+        throw new ForbiddenException('클럽 회원만 클럽 모임에 참여할 수 있습니다.');
+      }
+    }
+    const numPeople = await this.eventRepository.getParticipantsIds(eventId);
+    if(numPeople.length >= event.maxPeople){
       throw new ConflictException('인원이 가득 찼습니다.');
     }
 

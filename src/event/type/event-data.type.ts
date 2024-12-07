@@ -4,7 +4,7 @@ export type EventData = {
   title: string;
   description: string;
   categoryId: number;
-  // clubId: number | null;
+  clubId: number | null;
   eventCity: {
     cityId: number;
   }[];
