@@ -5,6 +5,7 @@ import { ClubData } from './type/club-data.type';
 import { UpdateClubData } from './type/update-club-data.type';
 import { ClubQuery } from './query/club.query';
 import { ClubApplicationData } from './type/club-application-data.type';
+import { EventData } from '../event/type/event-data.type';
 
 @Injectable()
 export class ClubRepository {
@@ -29,6 +30,72 @@ export class ClubRepository {
         description: true,
       },
     });
+  }
+
+  async leaveClub(clubId: number, userId: number): Promise<void> {
+    const userEvents = await this.getClubEventsByUserId(clubId, userId);
+    const deletionNeededEventsId = userEvents.filter(
+      (event) => event.hostId === userId && event.startTime > new Date(),
+    ).map((event) => event.id);
+    const leaveNeededEventsId = userEvents.filter(
+      (event) => event.hostId !== userId && event.startTime > new Date(),
+    ).map((event) => event.id);
+
+    await this.prisma.$transaction([
+      this.prisma.event.deleteMany({
+        where: {
+          id: {
+            in: deletionNeededEventsId,
+          },
+        },
+      }),
+      this.prisma.eventJoin.deleteMany({
+        where: {
+          eventId: {
+            in: leaveNeededEventsId,
+          },
+        },
+      }),
+      this.prisma.clubJoin.delete({
+        where:{
+          clubId_userId:{
+            clubId,
+            userId,
+          },
+        },
+      }),
+    ]);
+  }
+
+  async getClubEventsByUserId(clubId: number, userId: number): Promise<EventData[]> {
+    const eventCandidates = await this.prisma.event.findMany({
+      where: {
+        eventJoin:{
+          some:{
+            userId: userId,
+          },
+        },
+      },
+      select:{
+        id: true,
+        hostId: true,
+        title: true,
+        description: true,
+        categoryId: true,
+        clubId: true,
+        eventCity:{
+          select:{
+            id: true,
+            cityId: true,
+          }
+        },
+        startTime: true,
+        endTime: true,
+        maxPeople: true,
+      }
+    });
+
+    return eventCandidates.filter((event) => event.clubId === clubId);
   }
 
   async getMemberIdsByClubId(clubId: number): Promise<number[]> {

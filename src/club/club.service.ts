@@ -89,6 +89,26 @@ export class ClubService {
     await this.clubRepository.updateClubHost(clubId, userId);
   }
 
+  async leaveClub(clubId: number, user: UserBaseInfo): Promise<void> {
+    const isUserMember = await this.clubRepository.isMember(clubId, user.id);
+
+    if (!isUserMember) {
+      throw new BadRequestException('이 클럽의 멤버가 아닙니다.');
+    }
+
+    const club = await this.clubRepository.findClubById(clubId);
+    if (!club) {
+      throw new NotFoundException('클럽을 찾을 수 없습니다.');
+    }
+
+    if (club.hostId === user.id) {
+      throw new ForbiddenException('호스트는 클럽을 탈퇴할 수 없습니다.');
+    }
+    
+    await this.clubRepository.leaveClub(clubId, user.id);
+  }
+
+
   async getClubApplicationList(
     clubId: number,
     user: UserBaseInfo,

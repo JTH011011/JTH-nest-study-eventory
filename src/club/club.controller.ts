@@ -119,4 +119,17 @@ export class ClubController {
   ): Promise<void> {
     return this.clubService.delegateHost(clubId, hostId, user);
   }
+
+  @Post(':clubId/leave')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '클럽 탈퇴' })
+  @ApiNoContentResponse()
+  async leaveClub(
+    @Param('clubId', ParseIntPipe) clubId: number,
+    @CurrentUser() user: UserBaseInfo,
+  ): Promise<void> {
+    return this.clubService.leaveClub(clubId, user);
+  }
+
 }
