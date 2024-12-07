@@ -106,31 +106,6 @@ export class ClubController {
     );
   }
 
-  @Post(':clubId/leave')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '클럽 탈퇴' })
-  @ApiNoContentResponse()
-  async leaveClub(
-    @Param('clubId', ParseIntPipe) clubId: number,
-    @CurrentUser() user: UserBaseInfo,
-  ): Promise<void> {
-    return this.clubService.leaveClub(clubId, user);
-  }
-
-  @Delete(':clubId')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '클럽 삭제' })
-  @HttpCode(204)
-  @ApiNoContentResponse()
-  async deleteClub(
-    @Param('clubId', ParseIntPipe) clubId: number,
-    @CurrentUser() user: UserBaseInfo,
-  ): Promise<void> {
-    return this.clubService.deleteClub(clubId, user);
-  }
-
   @Patch(':clubId/host')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
