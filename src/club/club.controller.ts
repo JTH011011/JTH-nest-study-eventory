@@ -131,4 +131,18 @@ export class ClubController {
   ): Promise<void> {
     return this.clubService.leaveClub(clubId, user);
   }
+
+  @Delete(':clubId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(204)
+  @ApiOperation({ summary: '클럽 삭제' })
+  @ApiNoContentResponse()
+  async deleteClub(
+    @Param('clubId', ParseIntPipe) clubId: number,
+    @CurrentUser() user: UserBaseInfo,
+  ): Promise<void> {
+    return this.clubService.deleteClub(clubId, user);
+  }
+
 }

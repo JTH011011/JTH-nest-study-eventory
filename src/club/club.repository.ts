@@ -32,6 +32,61 @@ export class ClubRepository {
     });
   }
 
+  async deleteClub(clubId: number): Promise<void> {
+    const clubEvents = await this.prisma.event.findMany({
+      where: {
+        clubId: clubId,
+      }
+    });
+    const notStartedEventsId = clubEvents
+      .filter((event) => event.startTime > new Date())
+      .map((event) => event.id);
+    
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.eventCity.deleteMany({
+        where: {
+          eventId: {
+            in: notStartedEventsId,
+          },
+        },
+      });
+
+      await prisma.eventJoin.deleteMany({
+        where: {
+          eventId: {
+            in: notStartedEventsId,
+          },
+        },
+      });
+
+      await prisma.event.deleteMany({
+        where: {
+          id: {
+            in: notStartedEventsId,
+          },
+        },
+      });
+
+      await prisma.clubJoin.deleteMany({
+        where: {
+          clubId,
+        },
+      });
+
+      await prisma.clubApplication.deleteMany({
+        where: {
+          clubId,
+        },
+      });
+
+      await prisma.club.delete({
+        where: {
+          id: clubId,
+        },
+      });
+    });
+  }
+
   async leaveClub(clubId: number, userId: number): Promise<void> {
     const userEvents = await this.getClubEventsByUserId(clubId, userId);
     const deletionNeededEventsId = userEvents
@@ -45,30 +100,48 @@ export class ClubRepository {
       )
       .map((event) => event.id);
 
-    await this.prisma.$transaction([
-      this.prisma.event.deleteMany({
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.eventCity.deleteMany({
         where: {
-          id: {
+          eventId: {
             in: deletionNeededEventsId,
           },
         },
-      }),
-      this.prisma.eventJoin.deleteMany({
+      });
+
+      await prisma.eventJoin.deleteMany({
+        where: {
+          eventId: {
+            in: deletionNeededEventsId,
+          },
+        },
+      });
+
+      await prisma.eventJoin.deleteMany({
         where: {
           eventId: {
             in: leaveNeededEventsId,
           },
         },
-      }),
-      this.prisma.clubJoin.delete({
+      });
+
+      await prisma.event.deleteMany({
+        where: {
+          id: {
+            in: deletionNeededEventsId,
+          },
+        },
+      });
+
+      await prisma.clubJoin.delete({
         where: {
           clubId_userId: {
             clubId,
             userId,
           },
         },
-      }),
-    ]);
+      });
+    });
   }
 
   async getClubEventsByUserId(
