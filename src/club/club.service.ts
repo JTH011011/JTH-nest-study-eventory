@@ -64,6 +64,62 @@ export class ClubService {
     await this.clubRepository.createClubApplication(clubId, user.id);
   }
 
+  async delegateHost(
+    clubId: number,
+    userId: number,
+    user: UserBaseInfo,
+  ): Promise<void> {
+    const club = await this.clubRepository.findClubById(clubId);
+
+    if (!club) {
+      throw new NotFoundException('클럽을 찾을 수 없습니다.');
+    }
+
+    if (club.hostId !== user.id) {
+      throw new ForbiddenException('호스트인 사람만 이 작업을 수행할 수 있습니다.');
+    }
+    
+    const isMember = await this.clubRepository.isMember(clubId, userId);
+    if (!isMember) {
+      throw new BadRequestException('해당 사용자는 이 클럽의 멤버가 아닙니다.');
+    }
+    
+    await this.clubRepository.updateClubHost(clubId, userId);
+  }
+
+  async leaveClub(clubId: number, user: UserBaseInfo): Promise<void> {
+
+    const club = await this.clubRepository.findClubById(clubId);
+    if (!club) {
+      throw new NotFoundException('클럽을 찾을 수 없습니다.');
+    }
+
+    if (club.hostId === user.id) {
+      throw new ForbiddenException('호스트는 클럽에서 나갈 수 없습니다.');
+    }
+
+    const isMember = await this.clubRepository.isMember(clubId, user.id);
+    if (!isMember) {
+      throw new BadRequestException('이미 클럽원이 아닙니다.');
+    }
+
+    await this.clubRepository.leaveClub(clubId, user.id);
+  }
+
+  async deleteClub(clubId: number, user: UserBaseInfo): Promise<void> {
+    const club = await this.clubRepository.findClubById(clubId);
+
+    if (!club) {
+      throw new NotFoundException('클럽을 찾을 수 없습니다.');
+    }
+
+    if (club.hostId !== user.id) {
+      throw new ForbiddenException('클럽 호스트만 삭제 가능합니다.');
+    }
+
+    await this.clubRepository.deleteClub(clubId);
+  }
+
   async getClubApplicationList(
     clubId: number,
     user: UserBaseInfo,
