@@ -283,10 +283,6 @@ export class EventService {
         );
       }
     }
-    const numPeople = await this.eventRepository.getParticipantsIds(eventId);
-    if (numPeople.length >= event.maxPeople) {
-      throw new ConflictException('인원이 가득 찼습니다.');
-    }
 
     await this.eventRepository.joinEvent(eventId, user.id);
   }
