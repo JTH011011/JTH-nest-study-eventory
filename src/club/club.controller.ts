@@ -105,4 +105,18 @@ export class ClubController {
       user,
     );
   }
+
+  @Patch(':clubId/host')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '클럽 호스트 변경' })
+  @HttpCode(204)
+  @ApiNoContentResponse()
+  async updateClubHost(
+    @Param('clubId', ParseIntPipe) clubId: number,
+    @Body('hostId', ParseIntPipe) hostId: number,
+    @CurrentUser() user: UserBaseInfo,
+  ): Promise<void> {
+    return this.clubService.delegateHost(clubId, hostId, user);
+  }
 }
