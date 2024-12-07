@@ -64,7 +64,7 @@ export class EventRepository {
         },
       },
     });
-    
+
     return !!clubUser;
   }
 
@@ -73,7 +73,7 @@ export class EventRepository {
       where: {
         id: clubId,
       },
-    })
+    });
 
     return !!club;
   }
