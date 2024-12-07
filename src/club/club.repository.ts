@@ -36,12 +36,12 @@ export class ClubRepository {
     const clubEvents = await this.prisma.event.findMany({
       where: {
         clubId: clubId,
-      }
+      },
     });
     const notStartedEventsId = clubEvents
       .filter((event) => event.startTime > new Date())
       .map((event) => event.id);
-    
+
     await this.prisma.$transaction(async (prisma) => {
       await prisma.eventCity.deleteMany({
         where: {

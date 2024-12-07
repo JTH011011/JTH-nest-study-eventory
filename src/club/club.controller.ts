@@ -144,5 +144,4 @@ export class ClubController {
   ): Promise<void> {
     return this.clubService.deleteClub(clubId, user);
   }
-
 }
