@@ -143,8 +143,8 @@ export class ReviewRepository {
   }
 
   async getEventsByIds(
-    eventIds: number[]
-  ): Promise <{id: number; clubId: number | null}[]> {
+    eventIds: number[],
+  ): Promise<{ id: number; clubId: number | null }[]> {
     return this.prisma.event.findMany({
       where: {
         id: {
@@ -154,7 +154,7 @@ export class ReviewRepository {
       select: {
         id: true,
         clubId: true,
-      }
+      },
     });
   }
 

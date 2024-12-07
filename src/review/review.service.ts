@@ -15,7 +15,6 @@ import { PatchUpdateReviewPayload } from './payload/patch-update-review.payload'
 import { UserBaseInfo } from '../auth/type/user-base-info.type';
 import { ReviewData } from './type/review-data.type';
 
-
 @Injectable()
 export class ReviewService {
   constructor(private readonly reviewRepository: ReviewRepository) {}
@@ -104,7 +103,7 @@ export class ReviewService {
 
   async getReviews(
     query: ReviewQuery,
-    user: UserBaseInfo
+    user: UserBaseInfo,
   ): Promise<ReviewListDto> {
     const reviews = await this.reviewRepository.getReviews(query);
     if (reviews.length === 0) {
@@ -114,9 +113,13 @@ export class ReviewService {
     const eventIds = [...new Set(reviews.map((review) => review.eventId))];
     const events = await this.reviewRepository.getEventsByIds(eventIds);
 
-    const clubIds = [...new Set(events.map((event) => event.clubId).filter(
-      (id): id is number => id !== null,
-    ))];
+    const clubIds = [
+      ...new Set(
+        events
+          .map((event) => event.clubId)
+          .filter((id): id is number => id !== null),
+      ),
+    ];
     const alivdClubIds = await this.reviewRepository.getAliveClubIds(clubIds);
     const userClubIds = await this.reviewRepository.getClubIdsByUserId(user.id);
 
