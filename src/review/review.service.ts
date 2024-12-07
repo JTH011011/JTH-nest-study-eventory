@@ -69,25 +69,31 @@ export class ReviewService {
     return ReviewDto.from(review);
   }
 
-  async getReviewById(reviewId: number, user: UserBaseInfo): Promise<ReviewDto> {
+  async getReviewById(
+    reviewId: number,
+    user: UserBaseInfo,
+  ): Promise<ReviewDto> {
     const review = await this.reviewRepository.getReviewById(reviewId);
 
     if (!review) {
       throw new NotFoundException('Review가 존재하지 않습니다.');
     }
-    
+
     const event = await this.reviewRepository.getEventById(review.eventId);
     if (!event) {
       throw new NotFoundException('Event가 존재하지 않습니다.');
     }
 
-    if(event.clubId){
+    if (event.clubId) {
       const isClubAlive = await this.reviewRepository.isClubAlive(event.clubId);
-      if(!isClubAlive){
+      if (!isClubAlive) {
         throw new NotFoundException('사라진 클럽의 review는 볼 수 없습니다.');
       }
-      const isClubUser = await this.reviewRepository.isUserJoinedClub(user.id, event.clubId);
-      if(!isClubUser){
+      const isClubUser = await this.reviewRepository.isUserJoinedClub(
+        user.id,
+        event.clubId,
+      );
+      if (!isClubUser) {
         throw new ConflictException('클럽 회원만 리뷰를 조회할 수 있습니다.');
       }
     }
