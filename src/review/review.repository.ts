@@ -5,6 +5,7 @@ import { ReviewData } from './type/review-data.type';
 import { User, Event } from '@prisma/client';
 import { ReviewQuery } from './query/review.query';
 import { UpdateReviewData } from './type/update-review-data.type';
+import { EventData } from '../event/type/event-data.type';
 
 @Injectable()
 export class ReviewRepository {
@@ -139,6 +140,49 @@ export class ReviewRepository {
         description: true,
       },
     });
+  }
+
+  async getEventsByIds(
+    eventIds: number[]
+  ): Promise <{id: number; clubId: number | null}[]> {
+    return this.prisma.event.findMany({
+      where: {
+        id: {
+          in: eventIds,
+        },
+      },
+      select: {
+        id: true,
+        clubId: true,
+      }
+    });
+  }
+
+  async getClubIdsByUserId(userId: number): Promise<number[] | null> {
+    const clubJoin = await this.prisma.clubJoin.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        clubId: true,
+      },
+    });
+    return clubJoin.map((club) => club.clubId);
+  }
+
+  async getAliveClubIds(clubIds: number[]): Promise<number[]> {
+    const clubs = await this.prisma.club.findMany({
+      where: {
+        id: {
+          in: clubIds,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return clubs.map((club) => club.id);
   }
 
   async updateReview(

@@ -15,6 +15,7 @@ import { PatchUpdateReviewPayload } from './payload/patch-update-review.payload'
 import { UserBaseInfo } from '../auth/type/user-base-info.type';
 import { ReviewData } from './type/review-data.type';
 
+
 @Injectable()
 export class ReviewService {
   constructor(private readonly reviewRepository: ReviewRepository) {}
@@ -101,10 +102,41 @@ export class ReviewService {
     return ReviewDto.from(review);
   }
 
-  async getReviews(query: ReviewQuery): Promise<ReviewListDto> {
+  async getReviews(
+    query: ReviewQuery,
+    user: UserBaseInfo
+  ): Promise<ReviewListDto> {
     const reviews = await this.reviewRepository.getReviews(query);
+    if (reviews.length === 0) {
+      throw new NotFoundException('Review가 존재하지 않습니다.');
+    }
 
-    return ReviewListDto.from(reviews);
+    const eventIds = [...new Set(reviews.map((review) => review.eventId))];
+    const events = await this.reviewRepository.getEventsByIds(eventIds);
+
+    const clubIds = [...new Set(events.map((event) => event.clubId).filter(
+      (id): id is number => id !== null,
+    ))];
+    const alivdClubIds = await this.reviewRepository.getAliveClubIds(clubIds);
+    const userClubIds = await this.reviewRepository.getClubIdsByUserId(user.id);
+
+    const accesiblereviews = reviews.filter((review) => {
+      const event = events.find((e) => e.id === review.eventId);
+      if (!event) {
+        return false;
+      }
+      if (!event.clubId) {
+        return true;
+      }
+      if (!alivdClubIds.includes(event.clubId)) {
+        return false;
+      }
+      if (userClubIds && !userClubIds.includes(event.clubId)) {
+        return false;
+      }
+      return true;
+    });
+    return ReviewListDto.from(accesiblereviews);
   }
 
   async putUpdateReview(
