@@ -34,12 +34,16 @@ export class ClubRepository {
 
   async leaveClub(clubId: number, userId: number): Promise<void> {
     const userEvents = await this.getClubEventsByUserId(clubId, userId);
-    const deletionNeededEventsId = userEvents.filter(
-      (event) => event.hostId === userId && event.startTime > new Date(),
-    ).map((event) => event.id);
-    const leaveNeededEventsId = userEvents.filter(
-      (event) => event.hostId !== userId && event.startTime > new Date(),
-    ).map((event) => event.id);
+    const deletionNeededEventsId = userEvents
+      .filter(
+        (event) => event.hostId === userId && event.startTime > new Date(),
+      )
+      .map((event) => event.id);
+    const leaveNeededEventsId = userEvents
+      .filter(
+        (event) => event.hostId !== userId && event.startTime > new Date(),
+      )
+      .map((event) => event.id);
 
     await this.prisma.$transaction([
       this.prisma.event.deleteMany({
@@ -57,8 +61,8 @@ export class ClubRepository {
         },
       }),
       this.prisma.clubJoin.delete({
-        where:{
-          clubId_userId:{
+        where: {
+          clubId_userId: {
             clubId,
             userId,
           },
@@ -67,32 +71,35 @@ export class ClubRepository {
     ]);
   }
 
-  async getClubEventsByUserId(clubId: number, userId: number): Promise<EventData[]> {
+  async getClubEventsByUserId(
+    clubId: number,
+    userId: number,
+  ): Promise<EventData[]> {
     const eventCandidates = await this.prisma.event.findMany({
       where: {
-        eventJoin:{
-          some:{
+        eventJoin: {
+          some: {
             userId: userId,
           },
         },
       },
-      select:{
+      select: {
         id: true,
         hostId: true,
         title: true,
         description: true,
         categoryId: true,
         clubId: true,
-        eventCity:{
-          select:{
+        eventCity: {
+          select: {
             id: true,
             cityId: true,
-          }
+          },
         },
         startTime: true,
         endTime: true,
         maxPeople: true,
-      }
+      },
     });
 
     return eventCandidates.filter((event) => event.clubId === clubId);

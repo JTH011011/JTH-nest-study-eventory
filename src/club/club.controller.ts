@@ -131,5 +131,4 @@ export class ClubController {
   ): Promise<void> {
     return this.clubService.leaveClub(clubId, user);
   }
-
 }

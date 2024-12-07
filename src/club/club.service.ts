@@ -104,10 +104,9 @@ export class ClubService {
     if (club.hostId === user.id) {
       throw new ForbiddenException('호스트는 클럽을 탈퇴할 수 없습니다.');
     }
-    
+
     await this.clubRepository.leaveClub(clubId, user.id);
   }
-
 
   async getClubApplicationList(
     clubId: number,
