@@ -60,11 +60,12 @@ export class ClubRepository {
     clubId: number,
     userId: number,
   ): Promise<ClubApplicationData | null> {
-    return this.prisma.clubApplication.findUnique({
+    return this.prisma.clubApplication.findFirst({
       where: {
-        clubId_userId: {
-          clubId,
-          userId,
+        clubId,
+        userId,
+        user:{
+          deletedAt: null,
         },
       },
       select: {

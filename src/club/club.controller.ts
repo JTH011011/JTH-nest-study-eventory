@@ -99,6 +99,6 @@ export class ClubController {
     @Body() payload: ClubApprovalPayload,
     @CurrentUser() user: UserBaseInfo,
   ): Promise<void> {
-    return this.clubService.approveOrRejectClubApplication(payload, user);
+    return this.clubService.approveOrRejectClubApplication(clubId, payload, user);
   }
 }

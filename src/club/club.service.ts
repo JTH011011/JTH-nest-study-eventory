@@ -85,10 +85,11 @@ export class ClubService {
   }
 
   async approveOrRejectClubApplication(
+    clubId: number,
     payload: ClubApprovalPayload,
     user: UserBaseInfo,
   ): Promise<void> {
-    const { clubId, applicantUserId, isApproved } = payload;
+    const { applicantUserId, isApproved } = payload;
 
     const club = await this.clubRepository.findClubById(clubId);
     if (!club) {

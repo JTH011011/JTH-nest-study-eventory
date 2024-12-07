@@ -6,14 +6,6 @@ export class ClubApprovalPayload {
   @IsInt()
   @IsPositive()
   @ApiProperty({
-    description: '클럽 ID',
-    type: Number,
-  })
-  clubId!: number;
-
-  @IsInt()
-  @IsPositive()
-  @ApiProperty({
     description: '신청자 user ID',
     type: Number,
   })
