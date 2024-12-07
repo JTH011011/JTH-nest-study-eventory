@@ -24,7 +24,10 @@ import { ClubService } from './club.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorator/user.decorator';
 import { ClubDto, ClubListDto } from './dto/club.dto';
-import { ClubApplicationDto, ClubApplicationListDto } from './dto/club.application.dto';
+import {
+  ClubApplicationDto,
+  ClubApplicationListDto,
+} from './dto/club.application.dto';
 import { CreateClubPayload } from './payload/create-club.payload';
 import { ClubQuery } from './query/club.query';
 import { PatchUpdateClubPayload } from './payload/patch-update-club.payload';

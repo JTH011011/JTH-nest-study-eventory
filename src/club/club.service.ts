@@ -8,7 +8,10 @@ import {
 import { CreateClubPayload } from './payload/create-club.payload';
 import { UserBaseInfo } from '../auth/type/user-base-info.type';
 import { ClubDto, ClubListDto } from './dto/club.dto';
-import { ClubApplicationDto, ClubApplicationListDto } from './dto/club.application.dto';
+import {
+  ClubApplicationDto,
+  ClubApplicationListDto,
+} from './dto/club.application.dto';
 import { CreateClubData } from './type/create-club-data.type';
 import { ClubRepository } from './club.repository';
 import { ClubQuery } from './query/club.query';
@@ -64,7 +67,7 @@ export class ClubService {
   async getClubApplicationList(
     clubId: number,
     user: UserBaseInfo,
-  ): Promise<ClubApplicationListDto>{
+  ): Promise<ClubApplicationListDto> {
     const club = await this.clubRepository.findClubById(clubId);
 
     if (!club) {
@@ -75,7 +78,8 @@ export class ClubService {
       throw new ForbiddenException('당신은 이 클럽의 호스트가 아닙니다!');
     }
 
-    const clubApplications = await this.clubRepository.findClubApplications(clubId);
+    const clubApplications =
+      await this.clubRepository.findClubApplications(clubId);
 
     return ClubApplicationListDto.from(clubApplications);
   }
@@ -85,13 +89,13 @@ export class ClubService {
     user: UserBaseInfo,
   ): Promise<void> {
     const { clubId, applicantUserId, isApproved } = payload;
-    
+
     const club = await this.clubRepository.findClubById(clubId);
     if (!club) {
       throw new NotFoundException('클럽을 찾을 수 없습니다.');
     }
 
-    if(club.hostId !== user.id) {
+    if (club.hostId !== user.id) {
       throw new ForbiddenException('당신은 이 클럽의 호스트가 아닙니다!');
     }
 
@@ -103,14 +107,12 @@ export class ClubService {
       throw new NotFoundException('가입 신청서를 찾을 수 없습니다.');
     }
 
-    if(isApproved) {
+    if (isApproved) {
       await this.clubRepository.approveClubApplication(clubId, applicantUserId);
-    }
-    else {
+    } else {
       await this.clubRepository.rejectClubApplication(clubId, applicantUserId);
     }
   }
-
 
   async patchUpdateClub(
     clubId: number,
