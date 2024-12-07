@@ -21,6 +21,7 @@ export class EventRepository {
         startTime: data.startTime,
         endTime: data.endTime,
         maxPeople: data.maxPeople,
+        clubId: data.clubId,
         eventJoin: {
           create: {
             userId: data.hostId,
@@ -40,6 +41,7 @@ export class EventRepository {
         title: true,
         description: true,
         categoryId: true,
+        clubId: true,
         eventCity: {
           select: {
             cityId: true,
@@ -50,6 +52,30 @@ export class EventRepository {
         maxPeople: true,
       },
     });
+  }
+
+  async isClubUser(userId: number, clubId: number): Promise<boolean> {
+    const clubUser = await this.prisma.clubJoin.findFirst({
+      where: {
+        userId,
+        clubId,
+        user: {
+          deletedAt: null,
+        },
+      },
+    });
+
+    return !!clubUser;
+  }
+
+  async isClubExist(clubId: number): Promise<boolean> {
+    const club = await this.prisma.club.findUnique({
+      where: {
+        id: clubId,
+      },
+    });
+
+    return !!club;
   }
 
   async updateEvent(id: number, data: UpdateEventData): Promise<EventData> {
@@ -81,6 +107,7 @@ export class EventRepository {
         title: true,
         description: true,
         categoryId: true,
+        clubId: true,
         eventCity: {
           select: {
             cityId: true,
@@ -142,6 +169,7 @@ export class EventRepository {
         title: true,
         description: true,
         categoryId: true,
+        clubId: true,
         eventCity: {
           select: {
             cityId: true,
@@ -174,6 +202,7 @@ export class EventRepository {
         title: true,
         description: true,
         categoryId: true,
+        clubId: true,
         eventCity: {
           select: {
             cityId: true,
@@ -201,6 +230,7 @@ export class EventRepository {
         title: true,
         description: true,
         categoryId: true,
+        clubId: true,
         eventCity: {
           select: {
             cityId: true,
