@@ -136,7 +136,7 @@ export class ClubRepository {
       },
     });
   }
-  
+
   async updateClubHost(id: number, hostId: number): Promise<void> {
     await this.prisma.club.update({
       where: {
@@ -149,8 +149,7 @@ export class ClubRepository {
   }
 
   async isMember(clubId: number, userId: number): Promise<boolean> {
-    const member = await this.prisma.clubJoin.findFirst
-    ({
+    const member = await this.prisma.clubJoin.findFirst({
       where: {
         clubId,
         userId,
@@ -170,7 +169,7 @@ export class ClubRepository {
           userId,
         },
       },
-    })
+    });
   }
 
   async deleteClub(clubId: number): Promise<void> {
@@ -180,7 +179,6 @@ export class ClubRepository {
       },
     });
   }
-
 
   async findClubById(id: number): Promise<ClubData | null> {
     return this.prisma.club.findUnique({
