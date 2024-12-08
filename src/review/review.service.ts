@@ -100,7 +100,7 @@ export class ReviewService {
 
     return ReviewDto.from(review);
   }
-
+  /*
   async getReviews(
     query: ReviewQuery,
     user: UserBaseInfo,
@@ -150,7 +150,50 @@ export class ReviewService {
     }
     return ReviewListDto.from(accesiblereviews);
   }
+  */
 
+  async getReviews(
+    query: ReviewQuery,
+    user: UserBaseInfo,
+  ): Promise<ReviewListDto> {
+    const reviews = await this.reviewRepository.getReviews(query);
+    if (reviews.length === 0) {
+      throw new NotFoundException('Review가 존재하지 않습니다.');
+    }
+    const eventIds = [...new Set(reviews.map((review) => review.eventId))];
+    const eventDetailsAboutClub = 
+      await this.reviewRepository.getEventDetailsByEventIds(eventIds);
+    
+    const eventMap = new Map<number, { clubId: number | null; clubDeletedAt: Date | null }>(
+      eventDetailsAboutClub.map(event =>
+        [event.id, { clubId: event.clubId, clubDeletedAt: event.clubDeletedAt }])
+    );
+
+    const [userClubIds, userEventIds] = await Promise.all([
+      this.reviewRepository.getUserClubIdsByUserId(user.id),
+      this.reviewRepository.getUserEventIdsByUserId(user.id),
+    ]);
+
+    const accessibleReviews = reviews.filter((review) => {
+      const eventInfo = eventMap.get(review.eventId);
+      if (!eventInfo) {
+        return false;
+      }
+      const { clubId, clubDeletedAt } = eventInfo;
+      if (!clubId) {
+        return true;
+      } else if (!clubDeletedAt){
+        return userClubIds?.includes(clubId);
+      } else {
+        return userEventIds?.includes(review.eventId);
+      }
+    });
+
+    if (accessibleReviews.length === 0) {
+      throw new NotFoundException('Review가 존재하지 않습니다.');
+    }
+    return ReviewListDto.from(accessibleReviews);
+  }
   async putUpdateReview(
     reviewId: number,
     payload: PutUpdateReviewPayload,
