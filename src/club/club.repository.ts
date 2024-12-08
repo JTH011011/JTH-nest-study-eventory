@@ -158,7 +158,7 @@ export class ClubRepository {
   }
 
   async getClubEventsByUserId(
-    clubId: number, 
+    clubId: number,
     userId: number,
   ): Promise<EventData[]> {
     const eventCandidates = await this.prisma.event.findMany({
