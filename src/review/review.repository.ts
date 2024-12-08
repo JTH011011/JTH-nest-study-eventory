@@ -158,8 +158,10 @@ export class ReviewRepository {
   }
   */
   async getEventDetailsByEventIds(
-    eventIds: number[]
-  ): Promise<{ id: number; clubId: number | null; clubDeletedAt: Date | null }[]> {
+    eventIds: number[],
+  ): Promise<
+    { id: number; clubId: number | null; clubDeletedAt: Date | null }[]
+  > {
     const events = await this.prisma.event.findMany({
       where: { id: { in: eventIds } },
       select: {
@@ -170,14 +172,14 @@ export class ReviewRepository {
         },
       },
     });
-  
+
     return events.map((event) => ({
       id: event.id,
       clubId: event.clubId,
       clubDeletedAt: event.club?.deletedAt || null,
     }));
   }
-  
+
   async getUserClubIdsByUserId(userId: number): Promise<number[] | null> {
     const clubJoins = await this.prisma.clubJoin.findMany({
       where: {
@@ -213,7 +215,6 @@ export class ReviewRepository {
     }
     return eventJoins.map((eventJoin) => eventJoin.eventId);
   }
-
 
   async getReviewById(reviewId: number): Promise<ReviewData | null> {
     return this.prisma.review.findUnique({

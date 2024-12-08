@@ -161,12 +161,17 @@ export class ReviewService {
       throw new NotFoundException('Review가 존재하지 않습니다.');
     }
     const eventIds = [...new Set(reviews.map((review) => review.eventId))];
-    const eventDetailsAboutClub = 
+    const eventDetailsAboutClub =
       await this.reviewRepository.getEventDetailsByEventIds(eventIds);
-    
-    const eventMap = new Map<number, { clubId: number | null; clubDeletedAt: Date | null }>(
-      eventDetailsAboutClub.map(event =>
-        [event.id, { clubId: event.clubId, clubDeletedAt: event.clubDeletedAt }])
+
+    const eventMap = new Map<
+      number,
+      { clubId: number | null; clubDeletedAt: Date | null }
+    >(
+      eventDetailsAboutClub.map((event) => [
+        event.id,
+        { clubId: event.clubId, clubDeletedAt: event.clubDeletedAt },
+      ]),
     );
 
     const [userClubIds, userEventIds] = await Promise.all([
@@ -182,7 +187,7 @@ export class ReviewService {
       const { clubId, clubDeletedAt } = eventInfo;
       if (!clubId) {
         return true;
-      } else if (!clubDeletedAt){
+      } else if (!clubDeletedAt) {
         return userClubIds?.includes(clubId);
       } else {
         return userEventIds?.includes(review.eventId);
