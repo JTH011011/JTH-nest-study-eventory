@@ -79,6 +79,33 @@ export class ReviewRepository {
     return !!event;
   }
 
+  async isClubAlive(clubId: number): Promise<boolean> {
+    const club = await this.prisma.club.findUnique({
+      where: {
+        id: clubId,
+        deletedAt: null,
+      },
+    });
+
+    return !!club;
+  }
+
+  async isUserJoinedClub(userId: number, clubId: number): Promise<boolean> {
+    const clubUser = await this.prisma.clubJoin.findUnique({
+      where: {
+        clubId_userId: {
+          clubId,
+          userId,
+        },
+        user: {
+          deletedAt: null,
+        },
+      },
+    });
+
+    return !!clubUser;
+  }
+
   async getReviewById(reviewId: number): Promise<ReviewData | null> {
     return this.prisma.review.findUnique({
       where: {
