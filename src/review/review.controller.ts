@@ -60,10 +60,15 @@ export class ReviewController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: '여러 리뷰 정보를 가져옵니다' })
   @ApiOkResponse({ type: ReviewListDto })
-  async getReviews(@Query() query: ReviewQuery): Promise<ReviewListDto> {
-    return this.reviewService.getReviews(query);
+  async getReviews(
+    @Query() query: ReviewQuery,
+    @CurrentUser() user: UserBaseInfo,
+  ): Promise<ReviewListDto> {
+    return this.reviewService.getReviews(query, user);
   }
 
   @Put(':reviewId')

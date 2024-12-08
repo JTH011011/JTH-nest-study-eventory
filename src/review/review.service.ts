@@ -101,10 +101,46 @@ export class ReviewService {
     return ReviewDto.from(review);
   }
 
-  async getReviews(query: ReviewQuery): Promise<ReviewListDto> {
+  async getReviews(
+    query: ReviewQuery,
+    user: UserBaseInfo
+  ): Promise<ReviewListDto> {
     const reviews = await this.reviewRepository.getReviews(query);
+    if (reviews.length === 0) {
+      throw new NotFoundException('Review가 존재하지 않습니다.');
+    }
 
-    return ReviewListDto.from(reviews);
+    const eventIds = [...new Set(reviews.map((review) => review.eventId))];
+    const events = await this.reviewRepository.getEventClubIdPairsByEventIds(eventIds);
+
+    const clubIds = [...new Set(events.map((ecPair) => ecPair.clubId).filter(
+      (clubId): clubId is number => clubId !== null,
+    ))];
+    const aliveClubIds = clubIds.length > 0 ? 
+      await this.reviewRepository.getAllAliveclubsByClubIds(clubIds)
+      : [];
+    const userClubIds = await this.reviewRepository.getUserClubIdsByUserId(user.id);
+
+    const accesiblereviews = reviews.filter((review) => {
+      const event = events.find((eve) => eve.id === review.eventId);
+      if (!event) {
+        return false;
+      }
+      if (!event.clubId){
+        return true;
+      }
+      if (!aliveClubIds.some(club => club.id === event.clubId)){
+        return false;
+      }
+      if(userClubIds && !userClubIds.includes(event.clubId)){
+        return false;
+      }
+      return true;
+    });
+    if (accesiblereviews.length === 0) {
+      throw new NotFoundException('Review가 존재하지 않습니다.');
+    }
+    return ReviewListDto.from(accesiblereviews);
   }
 
   async putUpdateReview(
