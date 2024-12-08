@@ -28,7 +28,6 @@ export class ClubRepository {
         hostId: true,
         name: true,
         description: true,
-        deletedAt: true,
       },
     });
   }
@@ -68,24 +67,18 @@ export class ClubRepository {
         },
       });
 
-      await prisma.clubJoin.deleteMany({
-        where: {
-          clubId,
-        },
-      });
-
-      await prisma.clubApplication.deleteMany({
-        where: {
-          clubId,
-        },
-      });
-
-      await prisma.club.update({
-        where: {
+      await this.prisma.club.update({
+        where:{
           id: clubId,
         },
-        data: {
+        data:{
           deletedAt: new Date(),
+          clubJoin:{
+            deleteMany:{},
+          },
+          clubApplication:{
+            deleteMany:{},
+          },
         },
       });
     });
@@ -274,6 +267,7 @@ export class ClubRepository {
     return this.prisma.club.update({
       where: {
         id,
+        deletedAt: null,
       },
       data: {
         name: data.name,
@@ -292,6 +286,7 @@ export class ClubRepository {
     await this.prisma.club.update({
       where: {
         id,
+        deletedAt: null,
       },
       data: {
         hostId,
@@ -316,6 +311,7 @@ export class ClubRepository {
     return this.prisma.club.findUnique({
       where: {
         id,
+        deletedAt: null,
       },
       select: {
         id: true,
