@@ -103,7 +103,7 @@ export class ReviewService {
 
   async getReviews(
     query: ReviewQuery,
-    user: UserBaseInfo
+    user: UserBaseInfo,
   ): Promise<ReviewListDto> {
     const reviews = await this.reviewRepository.getReviews(query);
     if (reviews.length === 0) {
@@ -111,28 +111,36 @@ export class ReviewService {
     }
 
     const eventIds = [...new Set(reviews.map((review) => review.eventId))];
-    const events = await this.reviewRepository.getEventClubIdPairsByEventIds(eventIds);
+    const events =
+      await this.reviewRepository.getEventClubIdPairsByEventIds(eventIds);
 
-    const clubIds = [...new Set(events.map((ecPair) => ecPair.clubId).filter(
-      (clubId): clubId is number => clubId !== null,
-    ))];
-    const aliveClubIds = clubIds.length > 0 ? 
-      await this.reviewRepository.getAllAliveclubsByClubIds(clubIds)
-      : [];
-    const userClubIds = await this.reviewRepository.getUserClubIdsByUserId(user.id);
+    const clubIds = [
+      ...new Set(
+        events
+          .map((ecPair) => ecPair.clubId)
+          .filter((clubId): clubId is number => clubId !== null),
+      ),
+    ];
+    const aliveClubIds =
+      clubIds.length > 0
+        ? await this.reviewRepository.getAllAliveclubsByClubIds(clubIds)
+        : [];
+    const userClubIds = await this.reviewRepository.getUserClubIdsByUserId(
+      user.id,
+    );
 
     const accesiblereviews = reviews.filter((review) => {
       const event = events.find((eve) => eve.id === review.eventId);
       if (!event) {
         return false;
       }
-      if (!event.clubId){
+      if (!event.clubId) {
         return true;
       }
-      if (!aliveClubIds.some(club => club.id === event.clubId)){
+      if (!aliveClubIds.some((club) => club.id === event.clubId)) {
         return false;
       }
-      if(userClubIds && !userClubIds.includes(event.clubId)){
+      if (userClubIds && !userClubIds.includes(event.clubId)) {
         return false;
       }
       return true;
