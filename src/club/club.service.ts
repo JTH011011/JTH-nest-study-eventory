@@ -142,6 +142,22 @@ export class ClubService {
     return ClubApplicationListDto.from(clubApplications);
   }
 
+  async getClubbyClubId(clubId: number): Promise<ClubDto> {
+    const club = await this.clubRepository.findClubById(clubId);
+
+    if (!club) {
+      throw new NotFoundException('클럽을 찾을 수 없습니다.');
+    }
+
+    return ClubDto.from(club);
+  }
+
+  async getClubsbyHostId(query: ClubQuery): Promise<ClubListDto> {
+    const clubs = await this.clubRepository.findClubsByHostId(query);
+
+    return ClubListDto.from(clubs);
+  }
+
   async approveOrRejectClubApplication(
     clubId: number,
     payload: ClubApprovalPayload,

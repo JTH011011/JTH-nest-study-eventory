@@ -106,6 +106,22 @@ export class ClubController {
     );
   }
 
+  @Get(':clubId')
+  @ApiOperation({ summary: '클럽 조회 by ClubId' })
+  @ApiOkResponse({ type: ClubDto })
+  async getClub(
+    @Param('clubId', ParseIntPipe) clubId: number,
+  ): Promise<ClubDto> {
+    return this.clubService.getClubbyClubId(clubId);
+  }
+
+  @Get()
+  @ApiOperation({ summary: '클럽 조회 by HostId' })
+  @ApiOkResponse({ type: ClubListDto })
+  async getClubs(@Query() query: ClubQuery): Promise<ClubListDto> {
+    return this.clubService.getClubsbyHostId(query);
+  }
+
   @Patch(':clubId/host')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

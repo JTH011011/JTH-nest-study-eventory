@@ -141,6 +141,22 @@ export class ClubRepository {
     });
   }
 
+  async findClubsByHostId(query: ClubQuery): Promise<ClubData[]> {
+    const { hostId } = query;
+    return this.prisma.club.findMany({
+      where: {
+        hostId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        hostId: true,
+        name: true,
+        description: true,
+      },
+    });
+  }
+
   async getClubEventsByUserId(
     clubId: number,
     userId: number,
