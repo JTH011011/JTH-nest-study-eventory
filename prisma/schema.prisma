@@ -58,6 +58,7 @@ model Club{
   description String
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
   host     User   @relation(fields: [hostId], references: [id])
   

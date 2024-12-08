@@ -28,6 +28,7 @@ export class ClubRepository {
         hostId: true,
         name: true,
         description: true,
+        deletedAt: true,
       },
     });
   }
@@ -78,10 +79,13 @@ export class ClubRepository {
           clubId,
         },
       });
-
-      await prisma.club.delete({
+      
+      await prisma.club.update({
         where: {
           id: clubId,
+        },
+        data: {
+          deletedAt: new Date(),
         },
       });
     });
