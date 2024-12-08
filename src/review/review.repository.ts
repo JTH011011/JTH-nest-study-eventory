@@ -83,6 +83,7 @@ export class ReviewRepository {
     const club = await this.prisma.club.findUnique({
       where: {
         id: clubId,
+        deletedAt: null,
       },
     });
 
