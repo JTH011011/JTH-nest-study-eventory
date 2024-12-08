@@ -79,7 +79,7 @@ export class ClubRepository {
           clubId,
         },
       });
-      
+
       await prisma.club.update({
         where: {
           id: clubId,
