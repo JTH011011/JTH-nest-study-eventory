@@ -52,8 +52,9 @@ export class ReviewController {
   @ApiOkResponse({ type: ReviewDto })
   async getReviewById(
     @Param('reviewId', ParseIntPipe) reviewId: number,
+    @CurrentUser() user: UserBaseInfo,
   ): Promise<ReviewDto> {
-    return this.reviewService.getReviewById(reviewId);
+    return this.reviewService.getReviewById(reviewId, user);
   }
 
   @Get()
