@@ -115,7 +115,7 @@ export class ClubController {
     return this.clubService.getClubbyClubId(clubId);
   }
 
-  @Get(':hostId/clubs')
+  @Get()
   @ApiOperation({ summary: '클럽 조회 by HostId' })
   @ApiOkResponse({ type: ClubListDto })
   async getClubs(@Query() query: ClubQuery): Promise<ClubListDto> {
