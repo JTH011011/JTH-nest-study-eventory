@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ReviewRepository } from './review.repository';
 import { CreateReviewPayload } from './payload/create-review.payload';
@@ -100,57 +101,6 @@ export class ReviewService {
 
     return ReviewDto.from(review);
   }
-  /*
-  async getReviews(
-    query: ReviewQuery,
-    user: UserBaseInfo,
-  ): Promise<ReviewListDto> {
-    const reviews = await this.reviewRepository.getReviews(query);
-    if (reviews.length === 0) {
-      throw new NotFoundException('Review가 존재하지 않습니다.');
-    }
-
-    const eventIds = [...new Set(reviews.map((review) => review.eventId))];
-    const events =
-      await this.reviewRepository.getEventClubIdPairsByEventIds(eventIds);
-
-    const clubIds = [
-      ...new Set(
-        events
-          .map((ecPair) => ecPair.clubId)
-          .filter((clubId): clubId is number => clubId !== null),
-      ),
-    ];
-    const aliveClubIds =
-      clubIds.length > 0
-        ? await this.reviewRepository.getAllAliveclubsByClubIds(clubIds)
-        : [];
-    const userClubIds = await this.reviewRepository.getUserClubIdsByUserId(
-      user.id,
-    );
-
-    const accesiblereviews = reviews.filter((review) => {
-      const event = events.find((eve) => eve.id === review.eventId);
-      if (!event) {
-        return false;
-      }
-      if (!event.clubId) {
-        return true;
-      }
-      if (!aliveClubIds.some((club) => club.id === event.clubId)) {
-        return false;
-      }
-      if (userClubIds && !userClubIds.includes(event.clubId)) {
-        return false;
-      }
-      return true;
-    });
-    if (accesiblereviews.length === 0) {
-      throw new NotFoundException('Review가 존재하지 않습니다.');
-    }
-    return ReviewListDto.from(accesiblereviews);
-  }
-  */
 
   async getReviews(
     query: ReviewQuery,
@@ -158,7 +108,7 @@ export class ReviewService {
   ): Promise<ReviewListDto> {
     const reviews = await this.reviewRepository.getReviews(query);
     if (reviews.length === 0) {
-      throw new NotFoundException('Review가 존재하지 않습니다.');
+      return ReviewListDto.from([]);
     }
     const eventIds = [...new Set(reviews.map((review) => review.eventId))];
     const eventDetailsAboutClub =
@@ -182,7 +132,7 @@ export class ReviewService {
     const accessibleReviews = reviews.filter((review) => {
       const eventInfo = eventMap.get(review.eventId);
       if (!eventInfo) {
-        return false;
+        throw new InternalServerErrorException('Event 정보를 찾을 수 없습니다.');
       }
       const { clubId, clubDeletedAt } = eventInfo;
       if (!clubId) {
@@ -195,7 +145,7 @@ export class ReviewService {
     });
 
     if (accessibleReviews.length === 0) {
-      throw new NotFoundException('Review가 존재하지 않습니다.');
+      return ReviewListDto.from([]);
     }
     return ReviewListDto.from(accessibleReviews);
   }
