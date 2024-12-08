@@ -141,7 +141,8 @@ export class ClubRepository {
     });
   }
 
-  async findClubsByHostId(hostId: number): Promise<ClubData[]> {
+  async findClubsByHostId(query: ClubQuery): Promise<ClubData[]> {
+    const { hostId } = query;
     return this.prisma.club.findMany({
       where: {
         hostId,
@@ -157,7 +158,7 @@ export class ClubRepository {
   }
 
   async getClubEventsByUserId(
-    clubId: number,
+    clubId: number, 
     userId: number,
   ): Promise<EventData[]> {
     const eventCandidates = await this.prisma.event.findMany({

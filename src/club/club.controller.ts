@@ -106,12 +106,11 @@ export class ClubController {
     );
   }
 
-  @Get(':clubId/club')
+  @Get(':clubId')
   @ApiOperation({ summary: '클럽 조회 by ClubId' })
   @ApiOkResponse({ type: ClubDto })
   async getClub(
     @Param('clubId', ParseIntPipe) clubId: number,
-    @CurrentUser() user: UserBaseInfo,
   ): Promise<ClubDto> {
     return this.clubService.getClubbyClubId(clubId);
   }
@@ -120,10 +119,9 @@ export class ClubController {
   @ApiOperation({ summary: '클럽 조회 by HostId' })
   @ApiOkResponse({ type: ClubListDto })
   async getClubs(
-    @Param('hostId', ParseIntPipe) hostId: number,
-    @CurrentUser() user: UserBaseInfo,
+    @Query() query: ClubQuery,
   ): Promise<ClubListDto> {
-    return this.clubService.getClubsbyHostId(hostId);
+    return this.clubService.getClubsbyHostId(query);
   }
 
   @Patch(':clubId/host')

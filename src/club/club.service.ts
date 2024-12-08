@@ -152,12 +152,8 @@ export class ClubService {
     return ClubDto.from(club);
   }
 
-  async getClubsbyHostId(hostId: number): Promise<ClubListDto> {
-    const clubs = await this.clubRepository.findClubsByHostId(hostId);
-
-    if (clubs.length === 0) {
-      return ClubListDto.from([]);
-    }
+  async getClubsbyHostId(query: ClubQuery): Promise<ClubListDto> {
+    const clubs = await this.clubRepository.findClubsByHostId(query);
 
     return ClubListDto.from(clubs);
   }
