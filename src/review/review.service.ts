@@ -132,7 +132,9 @@ export class ReviewService {
     const accessibleReviews = reviews.filter((review) => {
       const eventInfo = eventMap.get(review.eventId);
       if (!eventInfo) {
-        throw new InternalServerErrorException('Event 정보를 찾을 수 없습니다.');
+        throw new InternalServerErrorException(
+          'Event 정보를 찾을 수 없습니다.',
+        );
       }
       const { clubId, clubDeletedAt } = eventInfo;
       if (!clubId) {
