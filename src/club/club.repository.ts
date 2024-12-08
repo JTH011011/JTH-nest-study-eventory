@@ -68,16 +68,16 @@ export class ClubRepository {
       });
 
       await this.prisma.club.update({
-        where:{
+        where: {
           id: clubId,
         },
-        data:{
+        data: {
           deletedAt: new Date(),
-          clubJoin:{
-            deleteMany:{},
+          clubJoin: {
+            deleteMany: {},
           },
-          clubApplication:{
-            deleteMany:{},
+          clubApplication: {
+            deleteMany: {},
           },
         },
       });
