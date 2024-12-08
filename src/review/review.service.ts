@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ReviewRepository } from './review.repository';
 import { CreateReviewPayload } from './payload/create-review.payload';
@@ -101,12 +102,55 @@ export class ReviewService {
     return ReviewDto.from(review);
   }
 
-  async getReviews(query: ReviewQuery): Promise<ReviewListDto> {
+  async getReviews(
+    query: ReviewQuery,
+    user: UserBaseInfo,
+  ): Promise<ReviewListDto> {
     const reviews = await this.reviewRepository.getReviews(query);
+    if (reviews.length === 0) {
+      return ReviewListDto.from([]);
+    }
+    const eventIds = [...new Set(reviews.map((review) => review.eventId))];
+    const eventDetailsAboutClub =
+      await this.reviewRepository.getEventDetailsByEventIds(eventIds);
 
-    return ReviewListDto.from(reviews);
+    const eventMap = new Map<
+      number,
+      { clubId: number | null; clubDeletedAt: Date | null }
+    >(
+      eventDetailsAboutClub.map((event) => [
+        event.id,
+        { clubId: event.clubId, clubDeletedAt: event.clubDeletedAt },
+      ]),
+    );
+
+    const [userClubIds, userEventIds] = await Promise.all([
+      this.reviewRepository.getUserClubIdsByUserId(user.id),
+      this.reviewRepository.getUserEventIdsByUserId(user.id),
+    ]);
+
+    const accessibleReviews = reviews.filter((review) => {
+      const eventInfo = eventMap.get(review.eventId);
+      if (!eventInfo) {
+        throw new InternalServerErrorException(
+          'Event 정보를 찾을 수 없습니다.',
+        );
+      }
+      const { clubId, clubDeletedAt } = eventInfo;
+      if (!clubId) {
+        return true;
+      } else if (!clubDeletedAt) {
+        return userClubIds?.includes(clubId);
+      } else {
+        return userEventIds?.includes(review.eventId);
+      }
+    });
+
+    if (accessibleReviews.length === 0) {
+      return ReviewListDto.from([]);
+    }
+    return ReviewListDto.from(accessibleReviews);
   }
-
   async putUpdateReview(
     reviewId: number,
     payload: PutUpdateReviewPayload,

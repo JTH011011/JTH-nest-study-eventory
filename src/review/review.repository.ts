@@ -106,6 +106,65 @@ export class ReviewRepository {
     return !!clubUser;
   }
 
+  async getEventDetailsByEventIds(
+    eventIds: number[],
+  ): Promise<
+    { id: number; clubId: number | null; clubDeletedAt: Date | null }[]
+  > {
+    const events = await this.prisma.event.findMany({
+      where: { id: { in: eventIds } },
+      select: {
+        id: true,
+        clubId: true,
+        club: {
+          select: { deletedAt: true },
+        },
+      },
+    });
+
+    return events.map((event) => ({
+      id: event.id,
+      clubId: event.clubId,
+      clubDeletedAt: event.club?.deletedAt || null,
+    }));
+  }
+
+  async getUserClubIdsByUserId(userId: number): Promise<number[] | null> {
+    const clubJoins = await this.prisma.clubJoin.findMany({
+      where: {
+        userId,
+        user: {
+          deletedAt: null,
+        },
+      },
+      select: {
+        clubId: true,
+      },
+    });
+    if (clubJoins.length === 0) {
+      return null;
+    }
+    return clubJoins.map((clubJoin) => clubJoin.clubId);
+  }
+
+  async getUserEventIdsByUserId(userId: number): Promise<number[] | null> {
+    const eventJoins = await this.prisma.eventJoin.findMany({
+      where: {
+        userId,
+        user: {
+          deletedAt: null,
+        },
+      },
+      select: {
+        eventId: true,
+      },
+    });
+    if (eventJoins.length === 0) {
+      return null;
+    }
+    return eventJoins.map((eventJoin) => eventJoin.eventId);
+  }
+
   async getReviewById(reviewId: number): Promise<ReviewData | null> {
     return this.prisma.review.findUnique({
       where: {
